@@ -1,12 +1,15 @@
 function getLines() {
 
 	var lines = [];
-	var requestType = 'Mode/Route';
+	var requestType = 'Mode/Route?modes=tube';
 
 	var res = xhrRequest(requestType, function(response) {
 
 		for(var i=0; i<response.length; i++) {
-			lines.push({'name':response[i].name, 'id':response[i].id});
+			lines.push({
+				'name': response[i].name,
+				'id': response[i].id
+			});
 		}
 
 		buildDropdown(lines, 'line');
@@ -18,7 +21,7 @@ function getLines() {
 function getStations(line) {
 
 	var stations = [];
-	var requestType = line + '/StopPoints';
+	var requestType = line + '/StopPoints?modes=tube';
 
 	var element = document.getElementById('station');
 
@@ -29,7 +32,10 @@ function getStations(line) {
 	var res = xhrRequest(requestType, function(response) {
 
 		for(var i=0; i<response.length; i++) {
-			stations.push({'name':response[i].commonName, 'id':response[i].id});
+			stations.push({
+				'name': response[i].commonName,
+				'id': response[i].id
+			});
 		}
 
 		buildDropdown(stations, 'station');
@@ -38,8 +44,28 @@ function getStations(line) {
 
 }
 
-function getArrivals(id) {
+function getArrivals(stationId) {
 
+	var tubeInfo = [];
+	var line = document.getElementById('lineSelection').value;
+	var requestType = line + '/Arrivals?stopPointId=' + stationId;
+
+	var res = xhrRequest(requestType, function(response) {
+
+		tubeInfo.push({
+			'Current Location': response[0].currentLocation, 
+			'Destination Name': response[0].destinationName,
+			'Direction': response[0].direction,
+			'Line Name': response[0].lineName,
+			'Platform Name' : response[0].platformName,
+			'Station Name' : response[0].stationName,
+			'Time To Live' : response[0].timeToLive,
+			'Time To Station' : response[0].timeToStation,
+			'Towards' : response[0].towards
+
+		});
+
+	});
 }
 
 function buildDropdown(obj, id) {
@@ -47,6 +73,7 @@ function buildDropdown(obj, id) {
 	var div = document.getElementById(id);
 
 	var select = document.createElement('select');
+	select.id = id + 'Selection';	
 	div.appendChild(select);
 
 	var option = document.createElement('option');
@@ -79,12 +106,14 @@ function somethingChanged(e) {
 	
 function xhrRequest(requestType, callback) {
 
+	// appID and appKey are required and are available when you register with tfl api
+
 	var response = '';
-	var appID = '87909d56';
-	var appKey = '1039040d1280c0ca995b4da746bd0736';
+	var appID = '';
+	var appKey = '';
 
 	var req = new XMLHttpRequest();
-	var url = 'https://api.tfl.gov.uk/Line/' + requestType + '?modes=tube&app_id=' + appID + '&app_key=' + appKey;
+	var url = 'https://api.tfl.gov.uk/Line/' + requestType + '&app_id=' + appID + '&app_key=' + appKey;
 	req.open('GET', url, true);
 	req.onload = function(e) {
 		if(req.readyState === 4 ) {
