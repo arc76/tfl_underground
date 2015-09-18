@@ -70,7 +70,6 @@ function getArrivals(stationId) {
 		info.appendChild(ul);
 
 		for(key in tubeInfo[0]) {
-			console.log(tubeInfo[0][key]);
 			var li = document.createElement('li');
 			li.innerHTML = '<strong>' + key + '</strong>' + ' - ' + tubeInfo[0][key];
 			ul.appendChild(li);
